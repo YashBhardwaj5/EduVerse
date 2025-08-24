@@ -1,27 +1,38 @@
 import { useState } from "react";
 import { BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 export const SignUpPage = () => {
+    const backenduri=import.meta.env.VITE_BACKEND_URI;
+    const navigate=useNavigate();
     const [formData, setFormData] = useState({
       name: '',
       email: '',
       password: '',
       confirmPassword: '',
-      role: 'student'
+      role: ''
     });
 
-    const handleSubmit = (e) => {
+    const handleSubmit =async (e) => {
       e.preventDefault();
       if (formData.password !== formData.confirmPassword) {
         alert('Passwords do not match!');
         return;
       }
-      // Mock registration
-      handleSignIn({
-        name: formData.name,
-        email: formData.email,
-        role: formData.role
-      });
+      try{
+      
+      const response=await axios.post(`${backenduri}/user/signup`,{
+        full_name:formData.name,
+        email:formData.email,
+        password:formData.password,
+        role:formData.role
+      })
+      console.log("added user");
+      navigate("/signin");
+      }catch(err){
+        console.error(err.message);
+      }
     };
 
     return (
@@ -87,8 +98,10 @@ export const SignUpPage = () => {
               <select
                 value={formData.role}
                 onChange={(e) => setFormData({...formData, role: e.target.value})}
+                required
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
               >
+                <option value="" disabled hidden>Select Role</option>
                 <option value="student">Student</option>
                 <option value="instructor">Instructor</option>
               </select>
